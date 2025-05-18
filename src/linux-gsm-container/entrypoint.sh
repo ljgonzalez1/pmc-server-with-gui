@@ -17,13 +17,21 @@ NC='\033[0m'
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ──────────────────────────────────────────────────────────────────────────────
+# LGSM control functions
+start_server()   { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" start; }
+stop_server()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" stop; }
+restart_server() { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" restart; }
+update_lgsm()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update-lgsm; }
+update_mc()      { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update; }
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Initialize environment: restore from backups if empty, then update accordingly
 init_environment() {
   printf "${YELLOW}Initializing environment...${NC}\n"
   RESTORED_LGSM=false
   RESTORED_MC=false
 
-  # Restore LGSM if empty
   if [ ! "$(ls -A "$MC_VOLUME/lgsm")" ]; then
     printf "${GREEN}Restoring LGSM from backup...${NC}\n"
     mkdir -p "$MC_VOLUME/lgsm"
@@ -31,7 +39,6 @@ init_environment() {
     RESTORED_LGSM=true
   fi
 
-  # Restore serverfiles if empty
   if [ ! "$(ls -A "$MC_VOLUME/serverfiles")" ]; then
     printf "${GREEN}Restoring serverfiles from backup...${NC}\n"
     mkdir -p "$MC_VOLUME/serverfiles"
@@ -39,7 +46,6 @@ init_environment() {
     RESTORED_MC=true
   fi
 
-  # If anything was restored, re-invoke self with only the needed updates
   if [ "$RESTORED_LGSM" = true ] || [ "$RESTORED_MC" = true ]; then
     printf "${YELLOW}Restoration complete, invoking updates...${NC}\n"
     CMD_ARGS=""
@@ -49,15 +55,6 @@ init_environment() {
     exec "$0" $CMD_ARGS
   fi
 }
-# ──────────────────────────────────────────────────────────────────────────────
-
-# ──────────────────────────────────────────────────────────────────────────────
-# LGSM control functions
-start_server()   { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" start; }
-stop_server()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" stop; }
-restart_server() { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" restart; }
-update_lgsm()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update-lgsm; }
-update_mc()      { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update; }
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -83,6 +80,37 @@ start_micro_api() {
   fi
 }
 # ──────────────────────────────────────────────────────────────────────────────
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Graceful shutdown: kill micro-API, stop MC server con timeout de 30 s
+shutdown_container() {
+  printf "${YELLOW}Shutdown signal received...${NC}\n"
+
+  # 1) Matar la micro-API si existe
+  [ -n "$MICRO_API_PID" ] && kill "$MICRO_API_PID" 2>/dev/null || true
+
+  # 2) Arrancar stop_server en background
+  stop_server &
+  SERVER_PID=$!
+
+  # 3) Watchdog: si stop_server no acaba en 30 s, suicidar el contenedor
+  (
+    sleep 30
+    printf "${RED}stop_server timeout (30 s), forcing container suicide${NC}\n"
+    kill -9 $$
+  ) &
+  WATCHER_PID=$!
+
+  # 4) Esperar a stop_server
+  if wait "$SERVER_PID"; then
+    # terminó antes de 30 s: cancelar watchdog y salir limpio
+    kill "$WATCHER_PID" 2>/dev/null || true
+    printf "${GREEN}stop_server completed, exiting cleanly${NC}\n"
+    exit 0
+  fi
+}
+# ──────────────────────────────────────────────────────────────────────────────
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Main dispatch
@@ -124,12 +152,22 @@ case "$1" in
 
   *)
     if [ -z "$1" ]; then
-      # No args: init, start API, then drop to shell
+      # No args: init, start API, then wait (PID 1) with signal handling
       init_environment
       start_micro_api
-      exec busybox sh
+
+      # Capture micro-API PID
+      MICRO_API_PID=$(pgrep -f "/usr/local/bin/micro-api.py" | head -n1)
+
+      # Trap SIGINT and SIGTERM to call shutdown_container
+      trap 'shutdown_container' INT TERM
+
+      # Keep the script alive
+      while true; do
+        sleep 3600
+      done
     else
-      # Unrecognized command: no-op / pass through
+      # Unrecognized command: pass through
       exec "$@"
     fi
     ;;
