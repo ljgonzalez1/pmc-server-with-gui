@@ -115,6 +115,11 @@ shutdown_container() {
 }
 # ──────────────────────────────────────────────────────────────────────────────
 
+do_nothing() {
+  while true; do
+    sleep 3600
+  done
+}
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Main dispatch
@@ -122,7 +127,6 @@ case "$1" in
 
   init)
     init_environment
-    exit 0
     ;;
 
   start)
@@ -167,9 +171,8 @@ case "$1" in
       trap 'shutdown_container' INT TERM
 
       # Keep the script alive
-      while true; do
-        sleep 3600
-      done
+      do_nothing
+      
     else
       # Unrecognized command: pass through
       exec "$@"
