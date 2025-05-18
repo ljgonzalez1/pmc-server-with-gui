@@ -1,3 +1,4 @@
 *.kate-swp
 *.env
 .env
+!example.env
