@@ -26,17 +26,3 @@ services:
       - /var/lib/minecraft/minecraft-server-data/serverfiles:${MC_VOLUME}/serverfiles
       - /var/lib/minecraft/minecraft-server-data/lgsm:${MC_VOLUME}/lgsm
     restart: unless-stopped
-
-  dashdot:
-    build:
-      context: ./dashdot
-      args:
-        BUILDHASH: ${DASHDOT_BUILDHASH:-latest}
-        VERSION: ${DASHDOT_VERSION:-latest}
-    container_name: dashdot-server
-    ports:
-      - "8081:3001"
-    volumes:
-      - /:/mnt/host:ro
-    privileged: true
-    restart: unless-stopped
