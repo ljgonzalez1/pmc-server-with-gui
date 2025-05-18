@@ -35,7 +35,7 @@ services:
         VERSION: ${DASHDOT_VERSION:-latest}
     container_name: dashdot-server
     ports:
-      - "80:3001"
+      - "8081:3001"
     volumes:
       - /:/mnt/host:ro
     privileged: true
