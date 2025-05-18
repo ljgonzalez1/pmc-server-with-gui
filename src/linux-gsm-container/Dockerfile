@@ -69,9 +69,11 @@ RUN mkdir -p /backup && \
 RUN sed -i "/${MC_USER} ALL=(ALL) NOPASSWD:ALL/d" /etc/sudoers && \
     gpasswd -d ${MC_USER} sudo
 
-# 13. Copy entrypoint script
+# 13. Copy entrypoint script y la API
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY micro-api.py /usr/local/bin/micro-api.py
+
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/micro-api.py
 
 # 14. Expose Minecraft and micro api port
 EXPOSE 25565
