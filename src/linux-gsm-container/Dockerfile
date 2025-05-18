@@ -32,7 +32,7 @@ RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    sudo curl \
+    sudo curl busybox \
     openjdk-${JAVA_VERSION}-jdk-headless \
     bc binutils bsdmainutils bzip2 cpio distro-info \
     file jq lib32gcc-s1 lib32stdc++6 \
@@ -69,11 +69,9 @@ RUN mkdir -p /backup && \
 RUN sed -i "/${MC_USER} ALL=(ALL) NOPASSWD:ALL/d" /etc/sudoers && \
     gpasswd -d ${MC_USER} sudo
 
-# 13. Copy entrypoint script and modules
+# 13. Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY modules/ /usr/local/bin/modules/
-RUN chmod +x /usr/local/bin/entrypoint.sh && \
-    chmod -R +x /usr/local/bin/modules/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # 14. Expose Minecraft port
 EXPOSE 25565
