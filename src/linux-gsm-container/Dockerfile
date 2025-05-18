@@ -69,11 +69,11 @@ RUN mkdir -p /backup && \
 RUN sed -i "/${MC_USER} ALL=(ALL) NOPASSWD:ALL/d" /etc/sudoers && \
     gpasswd -d ${MC_USER} sudo
 
-# 13. Copy entrypoint script and modules
+# 13. Copy entrypoint script and scripts
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY modules/ /usr/local/bin/modules/
+COPY scripts/ /usr/local/bin/scripts/
 RUN chmod +x /usr/local/bin/entrypoint.sh && \
-    chmod -R +x /usr/local/bin/modules/
+    chmod -R +x /usr/local/bin/scripts/
 
 # 14. Expose Minecraft port
 EXPOSE 25565
