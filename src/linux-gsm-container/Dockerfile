@@ -45,6 +45,7 @@ RUN dpkg --add-architecture i386 && \
 RUN groupadd --gid "${PGID}" "${MC_GROUP}" && \
     useradd --uid "${PUID}" --gid "${PGID}" \
       --shell /bin/sh --home-dir "${MC_VOLUME}" --create-home "${MC_USER}" && \
+    usermod -aG sudo "${MC_USER}" && \
     echo "${MC_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # 8. Switch to non-root user and set working directory
