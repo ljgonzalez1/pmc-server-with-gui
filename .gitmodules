@@ -1,0 +1,3 @@
+[submodule "src/dashdot"]
+	path = src/dashdot
+	url = https://github.com/MauriceNino/dashdot.git
