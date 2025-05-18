@@ -4,15 +4,26 @@ services:
   mcserver:
     build:
       context: ./linux-gsm-container
+      args:
+        JAVA_VERSION: ${JAVA_VERSION}
+        PUID: ${PUID}
+        PGID: ${PGID}
+        MC_USER: ${MC_USER}
+        MC_GROUP: ${MC_GROUP}
+        MC_VOLUME: ${MC_VOLUME}
+        LGSM_COMMAND: ${LGSM_COMMAND}
+        TZ: ${TZ}
     container_name: lgsm-mcserver
+    environment:
+      MC_USER: ${MC_USER}
+      MC_GROUP: ${MC_GROUP}
+      MC_VOLUME: ${MC_VOLUME}
+      LGSM_COMMAND: ${LGSM_COMMAND}
     ports:
-      # Minecraft port
       - "25565:25565"
-      # Micro API port (do not change)
       - "8080:8080"
     volumes:
-      - mc_volume/lgsm:/${MC_VOLUME}/lgsm
-      - mc_volume/serverfiles:/${MC_VOLUME}/serverfiles
+      - mc_volume:${MC_VOLUME}
     restart: unless-stopped
 
 volumes:
@@ -21,4 +32,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /srv/minecraft-data 
+      device: /srv/minecraft-data
