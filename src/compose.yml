@@ -26,3 +26,15 @@ services:
       - /var/lib/minecraft/minecraft-server-data/serverfiles:${MC_VOLUME}/serverfiles
       - /var/lib/minecraft/minecraft-server-data/lgsm:${MC_VOLUME}/lgsm
     restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
