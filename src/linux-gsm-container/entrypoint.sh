@@ -162,13 +162,6 @@ case "$1" in
     if [ -z "$1" ]; then
       # No args: init, start API, then wait (PID 1) with signal handling
       init_environment
-      start_micro_api
-
-      # Capture micro-API PID
-      MICRO_API_PID=$(pgrep -f "/usr/local/bin/micro-api.py" | head -n1)
-
-      # Trap SIGINT and SIGTERM to call shutdown_container
-      trap 'shutdown_container' INT TERM
       
     else
       # Unrecognized command: pass through
@@ -177,6 +170,14 @@ case "$1" in
     ;;
 esac
 # ──────────────────────────────────────────────────────────────────────────────
+
+start_micro_api
+
+# Capture micro-API PID
+MICRO_API_PID=$(pgrep -f "/usr/local/bin/micro-api.py" | head -n1)
+
+# Trap SIGINT and SIGTERM to call shutdown_container
+trap 'shutdown_container' INT TERM
 
 # Keep the script alive
 do_nothing
