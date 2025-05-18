@@ -18,11 +18,11 @@ NC='\033[0m'
 
 # ──────────────────────────────────────────────────────────────────────────────
 # LGSM control functions
-start_server()   { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" start; }
-stop_server()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" stop; }
-restart_server() { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" restart; }
-update_lgsm()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update-lgsm; }
-update_mc()      { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update; }
+start_server()   { cd "$MC_VOLUME" && sudo -u ${MC_USER} ./"$LGSM_COMMAND" start; }
+stop_server()    { cd "$MC_VOLUME" && sudo -u ${MC_USER} ./"$LGSM_COMMAND" stop; }
+restart_server() { cd "$MC_VOLUME" && sudo -u ${MC_USER} ./"$LGSM_COMMAND" restart; }
+update_lgsm()    { cd "$MC_VOLUME" && sudo -u ${MC_USER} ./"$LGSM_COMMAND" update-lgsm; }
+update_mc()      { cd "$MC_VOLUME" && sudo -u ${MC_USER} ./"$LGSM_COMMAND" update; }
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -49,6 +49,7 @@ init_environment() {
     chown -R ${MC_USER}:${MC_GROUP} "$MC_VOLUME/serverfiles"
   fi
 
+  ## FIXME: It has to combine both into one update if both are true
   if [ "$RESTORED_LGSM" = true ] || [ "$RESTORED_MC" = true ]; then
     printf "${YELLOW}Restoration complete, invoking updates...${NC}\n"
     CMD_ARGS=""
@@ -125,32 +126,32 @@ case "$1" in
     ;;
 
   start)
-    sudo -u ${MC_USER} start_server
+    start_server
     ;;
 
   stop)
-    sudo -u ${MC_USER} stop_server
+    stop_server
     ;;
 
   restart)
-    sudo -u ${MC_USER} restart_server
+    restart_server
     ;;
 
   update-lgsm)
-    sudo -u ${MC_USER} update_lgsm
+    update_lgsm
     ;;
 
   update-mc)
-    sudo -u ${MC_USER} update_mc
+    update_mc
     ;;
 
   update)
-    sudo -u ${MC_USER} update_lgsm
-    sudo -u ${MC_USER} update_mc
+    update_lgsm
+    update_mc
     ;;
 
   console)
-    sudo -u ${MC_USER} server_console
+    server_console
     ;;
 
   *)
