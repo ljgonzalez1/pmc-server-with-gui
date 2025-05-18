@@ -32,7 +32,7 @@ RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    sudo curl \
+    sudo curl busybox\
     openjdk-${JAVA_VERSION}-jdk-headless \
     bc binutils bsdmainutils bzip2 cpio distro-info \
     file jq lib32gcc-s1 lib32stdc++6 \
