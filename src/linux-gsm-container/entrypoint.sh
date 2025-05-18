@@ -169,9 +169,6 @@ case "$1" in
 
       # Trap SIGINT and SIGTERM to call shutdown_container
       trap 'shutdown_container' INT TERM
-
-      # Keep the script alive
-      do_nothing
       
     else
       # Unrecognized command: pass through
@@ -180,3 +177,6 @@ case "$1" in
     ;;
 esac
 # ──────────────────────────────────────────────────────────────────────────────
+
+# Keep the script alive
+do_nothing
