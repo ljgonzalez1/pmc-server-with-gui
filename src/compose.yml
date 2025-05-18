@@ -23,13 +23,7 @@ services:
       - "25565:25565"
       - "8080:8080"
     volumes:
-      - mc_volume:${MC_VOLUME}
+      - /var/lib/minecraft-server-data/serverfiles:${MC_VOLUME}/serverfiles
+      - /var/lib/minecraft-server-data/lgsm:${MC_VOLUME}/lgsm
     restart: unless-stopped
 
-volumes:
-  mc_volume:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /var/lib/minecraft-server-data
