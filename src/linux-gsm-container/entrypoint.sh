@@ -37,6 +37,7 @@ init_environment() {
     mkdir -p "$MC_VOLUME/lgsm"
     tar -xzf /backup/lgsm.tar.gz -C "$MC_VOLUME"
     RESTORED_LGSM=true
+    chown -R ${MC_USER}:${MC_GROUP} "$MC_VOLUME/lgsm"
   fi
 
   if [ ! "$(ls -A "$MC_VOLUME/serverfiles")" ]; then
@@ -44,6 +45,8 @@ init_environment() {
     mkdir -p "$MC_VOLUME/serverfiles"
     tar -xzf /backup/serverfiles.tar.gz -C "$MC_VOLUME"
     RESTORED_MC=true
+    
+    chown -R ${MC_USER}:${MC_GROUP} "$MC_VOLUME/serverfiles"
   fi
 
   if [ "$RESTORED_LGSM" = true ] || [ "$RESTORED_MC" = true ]; then
@@ -90,7 +93,7 @@ shutdown_container() {
   [ -n "$MICRO_API_PID" ] && kill "$MICRO_API_PID" 2>/dev/null || true
 
   # 2) Arrancar stop_server en background
-  stop_server &
+  sudo -u ${MC_USER} stop_server &
   SERVER_PID=$!
 
   # 3) Watchdog: si stop_server no acaba en 30 s, suicidar el contenedor
@@ -102,7 +105,7 @@ shutdown_container() {
   WATCHER_PID=$!
 
   # 4) Esperar a stop_server
-  if wait "$SERVER_PID"; then
+  if wait "$SERVER_PID"; then 
     # terminó antes de 30 s: cancelar watchdog y salir limpio
     kill "$WATCHER_PID" 2>/dev/null || true
     printf "${GREEN}stop_server completed, exiting cleanly${NC}\n"
@@ -122,32 +125,32 @@ case "$1" in
     ;;
 
   start)
-    start_server
+    sudo -u ${MC_USER} start_server
     ;;
 
   stop)
-    stop_server
+    sudo -u ${MC_USER} stop_server
     ;;
 
   restart)
-    restart_server
+    sudo -u ${MC_USER} restart_server
     ;;
 
   update-lgsm)
-    update_lgsm
+    sudo -u ${MC_USER} update_lgsm
     ;;
 
   update-mc)
-    update_mc
+    sudo -u ${MC_USER} update_mc
     ;;
 
   update)
-    update_lgsm
-    update_mc
+    sudo -u ${MC_USER} update_lgsm
+    sudo -u ${MC_USER} update_mc
     ;;
 
   console)
-    server_console
+    sudo -u ${MC_USER} server_console
     ;;
 
   *)

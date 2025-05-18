@@ -80,8 +80,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/micro-api.py
 EXPOSE 25565
 EXPOSE 8080
 
-# 15. Change to user
-USER ${MC_USER}
-
-# 16. Set entrypoint for runtime
+# 15. Set entrypoint for runtime
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
