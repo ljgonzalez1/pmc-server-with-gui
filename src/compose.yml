@@ -23,7 +23,7 @@ services:
       - "25565:25565"
       - "8080:8080"
     volumes:
-      - /var/lib/minecraft-server-data/serverfiles:${MC_VOLUME}/serverfiles
-      - /var/lib/minecraft-server-data/lgsm:${MC_VOLUME}/lgsm
+      - /var/lib/minecraft/minecraft-server-data/serverfiles:${MC_VOLUME}/serverfiles
+      - /var/lib/minecraft/minecraft-server-data/lgsm:${MC_VOLUME}/lgsm
     restart: unless-stopped
 
