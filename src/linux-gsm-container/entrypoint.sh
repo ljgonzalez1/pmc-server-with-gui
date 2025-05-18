@@ -47,7 +47,7 @@ update_lgsm()    { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update-lgsm; }
 update_mc()      { cd "$MC_VOLUME" && ./"$LGSM_COMMAND" update; }
 
 # Attach to the Minecraft console via tmux socket
-console() {
+server_console() {
   echo "Attaching to Minecraft console..."
   cd "$MC_VOLUME"
   UID_FILE="$MC_VOLUME/lgsm/data/${LGSM_COMMAND}.uid"
@@ -82,12 +82,13 @@ case "$1" in
     update_mc
     ;;
   console)
-    console
+    server_console
     ;;
   *)
     if [ -z "$1" ]; then
-      # No args: initialize then drop to shell
+      # No args: initialize, start micro-API, then drop to shell
       init_environment
+      python3 /usr/local/bin/micro-api.py &
       exec busybox sh
     else
       # Execute any other passed command
